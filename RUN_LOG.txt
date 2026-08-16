@@ -1,0 +1,2 @@
+2026-08-17 06:02:35 RUN-001 gestartet
+2026-08-17 06:02:35 30 Datensaetze exportiert (30 neu) - OK
