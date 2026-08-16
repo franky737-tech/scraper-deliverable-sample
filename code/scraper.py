@@ -3,17 +3,18 @@
 Demo-Projekt (Portfolio): Scheduled Web Scraper mit Delta-Logik + Export.
 Zeigt exakt die Faehigkeiten, die typische Scraping-Jobs verlangen:
 - Robots.txt-respektierendes Scraping (1 req/sec, eigener User-Agent, oeffentliche Daten)
+- Saubere Datendekodierung (HTML-Entities werden aufgeloest)
 - Delta-Logik: nur NEUE Eintraege werden exportiert (SQLite-Speicher)
-- CSV-Export + optionale Google-Sheets-Anbindung (API-Key des Kunden)
-- Scheduling via cron / GitHub Actions
+- CSV-Export + optionale Google-Sheets-Anbindung
+- Scheduling via cron / GitHub Actions (Vorlage: github_actions_weekly.yml)
 
 Zielseite: quotes.toscrape.com (explizit als Scraping-Uebungsziel freigegeben)
 Lauf: python3 scraper.py
 """
-import csv, os, sqlite3, time, urllib.request
+import csv, html as html_lib, os, sqlite3, time, urllib.request
 
 TARGET_URL = "http://quotes.toscrape.com/"
-USER_AGENT = "PortfolioDemoScraper/1.0 (portfolio sample)"
+USER_AGENT = "PortfolioDemoScraper/1.1 (portfolio sample)"
 DB = os.path.join(os.path.dirname(os.path.abspath(__file__)), "seen.sqlite3")
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "new_items.csv")
 DELAY_SECONDS = 1.0  # robots.txt-respektierendes Throttling
@@ -28,7 +29,7 @@ def fetch(url):
 def parse(html):
     import re
     return [
-        {"text": t.strip(), "author": a.strip()}
+        {"text": html_lib.unescape(t.strip()), "author": html_lib.unescape(a.strip())}
         for t, a in re.findall(
             r'<span class="text" itemprop="text">(.*?)</span>.*?'
             r'<small class="author" itemprop="author">(.*?)</small>', html, re.S)
@@ -65,7 +66,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-# SCHEDULING:
-# cron (Linux/Mac):  0 6 * * 1  /usr/bin/python3 /pfad/scraper.py
-# GitHub Actions:    woechentlicher Workflow moeglich
