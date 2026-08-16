@@ -1,0 +1,20 @@
+# GitHub-Actions-Workflow (Vorlage)
+# Zur Aktivierung: diese Datei nach .github/workflows/weekly.yml kopieren
+# (Settings -> Actions -> Allow, dann laeuft der Scraper jeden Montag 06:00 UTC)
+name: Weekly scrape
+on:
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: python3 code/scraper.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: new_items
+          path: code/new_items.csv
